@@ -1,7 +1,18 @@
 import Image from "next/image";
 import Link from "next/link";
 import { products } from "@/lib/products";
+import { buildLog } from "@/lib/buildLog";
 import InquiryForm from "@/components/InquiryForm";
+
+function formatDate(iso: string): string {
+  const d = new Date(iso + "T00:00:00Z");
+  return d.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+}
 
 const capabilities = [
   { k: "01", label: "Product design" },
@@ -65,6 +76,60 @@ export default function Home() {
               </li>
             ))}
           </ul>
+        </div>
+      </section>
+
+      {/* About */}
+      <section id="about" className="border-b border-[var(--border)]">
+        <div className="mx-auto max-w-5xl px-6 py-16 sm:py-20">
+          <div className="grid gap-12 md:grid-cols-12">
+            <div className="md:col-span-4">
+              <p className="font-mono text-xs uppercase tracking-widest text-[var(--muted)]">
+                — What is creativekat
+              </p>
+              <h2 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
+                A <span className="brand-gradient">tiny</span> studio for digital things.
+              </h2>
+            </div>
+            <div className="md:col-span-8">
+              <p className="text-xl leading-relaxed text-[var(--foreground)] sm:text-2xl">
+                <strong className="font-semibold">
+                  creativekat<span className="brand-gradient">.studio</span>
+                </strong>{" "}
+                is where a few obsessions turn into products — interfaces,
+                components, and small tools made with more care than a
+                roadmap usually allows.
+              </p>
+              <p className="mt-6 text-base leading-relaxed text-[var(--muted)]">
+                Each thing we ship is built end-to-end here: design, code,
+                writing, and ongoing maintenance. We work small on purpose —
+                fewer projects, more attention.
+              </p>
+              <ul className="mt-10 grid gap-px overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--border)] sm:grid-cols-3">
+                {[
+                  {
+                    k: "Independent",
+                    v: "Self-funded, no investors. We answer to the work.",
+                  },
+                  {
+                    k: "Hands-on",
+                    v: "Same person designs and ships. No handoff layers.",
+                  },
+                  {
+                    k: "Long-lived",
+                    v: "Products are maintained, not abandoned after launch.",
+                  },
+                ].map((it) => (
+                  <li key={it.k} className="bg-[var(--background)] p-5">
+                    <p className="font-mono text-[11px] uppercase tracking-widest text-[var(--muted)]">
+                      {it.k}
+                    </p>
+                    <p className="mt-2 text-sm leading-relaxed">{it.v}</p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -194,6 +259,75 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Build log */}
+      <section id="log" className="border-b border-[var(--border)]">
+        <div className="mx-auto max-w-5xl px-6 py-16 sm:py-20">
+          <div className="grid gap-12 md:grid-cols-12">
+            <div className="md:col-span-4">
+              <p className="font-mono text-xs uppercase tracking-widest text-[var(--muted)]">
+                — Build log
+              </p>
+              <h2 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
+                What we&apos;ve <span className="brand-gradient">shipped</span>{" "}
+                lately.
+              </h2>
+              <p className="mt-4 text-[var(--muted)]">
+                Public, dated entries — small wins, broken things, course
+                corrections. No marketing copy.
+              </p>
+
+              <dl className="mt-8 space-y-3 border-t border-[var(--border)] pt-6 text-sm">
+                <Stat
+                  label="Products live"
+                  value={products.filter((p) => p.status === "Live").length}
+                />
+                <Stat label="Log entries" value={buildLog.length} />
+                <Stat
+                  label="Last shipped"
+                  value={lastShippedRelative(buildLog[0]?.date)}
+                />
+              </dl>
+            </div>
+
+            <div className="md:col-span-8">
+              <ol className="relative space-y-1 border-l border-[var(--border)]">
+                {buildLog.map((e, i) => (
+                  <li
+                    key={`${e.date}-${i}`}
+                    className="group relative pl-8 pr-2 py-4"
+                  >
+                    <span
+                      aria-hidden
+                      className="absolute left-[-5px] top-6 inline-block size-2.5 rounded-full border-2 border-[var(--background)] bg-gradient-to-br from-violet-600 to-blue-600"
+                    />
+                    <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                      <time
+                        dateTime={e.date}
+                        className="font-mono text-[11px] uppercase tracking-widest text-[var(--muted)]"
+                      >
+                        {formatDate(e.date)}
+                      </time>
+                      <span className="rounded-full border border-[var(--border)] px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest text-[var(--muted)]">
+                        {e.product}
+                      </span>
+                    </div>
+                    <p className="mt-1.5 text-[15px] font-medium">{e.title}</p>
+                    {e.note && (
+                      <p className="mt-1 text-sm leading-relaxed text-[var(--muted)]">
+                        {e.note}
+                      </p>
+                    )}
+                  </li>
+                ))}
+              </ol>
+              <p className="mt-6 pl-8 text-xs text-[var(--muted)]">
+                — keep watching this space.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Contact */}
       <section id="contact" className="relative overflow-hidden">
         <div
@@ -237,4 +371,33 @@ export default function Home() {
       </section>
     </div>
   );
+}
+
+function Stat({ label, value }: { label: string; value: string | number }) {
+  return (
+    <div className="flex items-baseline justify-between gap-4">
+      <dt className="font-mono text-[11px] uppercase tracking-widest text-[var(--muted)]">
+        {label}
+      </dt>
+      <dd className="font-mono tabular-nums text-[var(--foreground)]">
+        {value}
+      </dd>
+    </div>
+  );
+}
+
+function lastShippedRelative(iso?: string): string {
+  if (!iso) return "—";
+  const then = new Date(iso + "T00:00:00Z");
+  const today = new Date();
+  const days = Math.floor(
+    (Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()) -
+      Date.UTC(then.getUTCFullYear(), then.getUTCMonth(), then.getUTCDate())) /
+      86_400_000,
+  );
+  if (days <= 0) return "today";
+  if (days === 1) return "yesterday";
+  if (days < 7) return `${days} days ago`;
+  if (days < 30) return `${Math.round(days / 7)}w ago`;
+  return `${Math.round(days / 30)}mo ago`;
 }

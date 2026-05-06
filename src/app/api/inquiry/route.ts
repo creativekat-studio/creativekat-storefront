@@ -89,5 +89,33 @@ export async function POST(req: Request) {
     );
   }
 
+  // Auto-reply to the submitter. Best-effort — failure here doesn't fail the inquiry.
+  fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from,
+      to: [email],
+      reply_to: TO,
+      subject: "We got your note — creativekat studio",
+      text: [
+        `Hi ${name.split(" ")[0]},`,
+        "",
+        "Thanks for reaching out to creativekat studio — your note landed safely. We read every message and reply within a few days.",
+        "",
+        "For reference, here's what you sent:",
+        "",
+        message,
+        "",
+        "—",
+        "creativekat.studio",
+        "hello@creativekat.studio",
+      ].join("\n"),
+    }),
+  }).catch((err) => console.error("[inquiry] auto-reply failed", err));
+
   return NextResponse.json({ ok: true, delivered: true });
 }
