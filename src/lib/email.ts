@@ -8,6 +8,7 @@ const BRAND = {
   border: "#e7e5e4",
   surface: "#ffffff",
   bg: "#fafaf9",
+  site: "https://creativekat.studio",
 };
 
 function shell(inner: string, preheader: string): string {
@@ -29,19 +30,13 @@ function shell(inner: string, preheader: string): string {
         <table role="presentation" width="560" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;width:100%;background:${BRAND.surface};border:1px solid ${BRAND.border};border-radius:16px;overflow:hidden;">
           <!-- Header -->
           <tr>
-            <td style="background:${BRAND.gradient};padding:32px 32px;">
-              <table role="presentation" cellpadding="0" cellspacing="0" border="0">
-                <tr>
-                  <td style="vertical-align:middle;">
-                    <table role="presentation" cellpadding="0" cellspacing="0" border="0">
-                      <tr>
-                        <td style="background:rgba(255,255,255,0.18);border-radius:10px;width:40px;height:40px;text-align:center;vertical-align:middle;font-size:24px;font-weight:700;color:#fff;line-height:40px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">k</td>
-                        <td style="padding-left:12px;font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.92);">creativekat<span style="color:rgba(255,255,255,0.7);">.studio</span></td>
-                      </tr>
-                    </table>
-                  </td>
-                </tr>
-              </table>
+            <td style="background:${BRAND.surface};padding:24px 32px;border-bottom:1px solid ${BRAND.border};">
+              <a href="${BRAND.site}" style="text-decoration:none;color:${BRAND.text};">
+                <img src="${BRAND.site}/creativekat-studio-light.png"
+                     width="180" height="30"
+                     alt="creativekat.studio"
+                     style="display:block;border:0;outline:none;text-decoration:none;height:30px;width:auto;max-width:220px;" />
+              </a>
             </td>
           </tr>
           <!-- Body -->
@@ -77,15 +72,15 @@ function shell(inner: string, preheader: string): string {
 
 function escapeHtml(s: string): string {
   return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
 }
 
 function nl2br(s: string): string {
-  return escapeHtml(s).replace(/\n/g, "<br />");
+  return escapeHtml(s).replaceAll("\n", "<br />");
 }
 
 export type InquiryFields = {
@@ -182,7 +177,7 @@ export function autoReply(f: InquiryFields): { html: string; text: string } {
     <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 28px 0;">
       <tr>
         <td style="padding-right:8px;">
-          <a href="https://disenio.studio" style="display:inline-block;padding:10px 16px;border:1px solid ${BRAND.border};border-radius:999px;font-size:14px;color:${BRAND.text};text-decoration:none;">diseño.studio ↗</a>
+          <a href="https://disenio.studio" style="display:inline-block;padding:10px 16px;border:1px solid ${BRAND.border};border-radius:999px;font-size:14px;color:${BRAND.text};text-decoration:none;">disenio.studio ↗</a>
         </td>
         <td>
           <a href="https://creativekat.studio" style="display:inline-block;padding:10px 16px;border:1px solid ${BRAND.border};border-radius:999px;font-size:14px;color:${BRAND.text};text-decoration:none;">creativekat.studio ↗</a>
