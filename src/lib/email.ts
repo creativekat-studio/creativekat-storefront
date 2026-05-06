@@ -1,0 +1,224 @@
+// Shared email templates. Inline styles only — email clients (Outlook
+// especially) strip <style> tags and stylesheets.
+
+const BRAND = {
+  gradient: "linear-gradient(135deg, #6d28d9, #4f46e5, #2563eb)",
+  text: "#1a1820",
+  muted: "#6b7280",
+  border: "#e7e5e4",
+  surface: "#ffffff",
+  bg: "#fafaf9",
+};
+
+function shell(inner: string, preheader: string): string {
+  // preheader = the inbox preview line; hidden in the body
+  return `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="color-scheme" content="light" />
+  <meta name="supported-color-schemes" content="light" />
+  <title>creativekat studio</title>
+</head>
+<body style="margin:0;padding:0;background:${BRAND.bg};font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:${BRAND.text};">
+  <span style="display:none!important;visibility:hidden;mso-hide:all;font-size:1px;color:${BRAND.bg};line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">${escapeHtml(preheader)}</span>
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${BRAND.bg};">
+    <tr>
+      <td align="center" style="padding:32px 16px;">
+        <table role="presentation" width="560" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;width:100%;background:${BRAND.surface};border:1px solid ${BRAND.border};border-radius:16px;overflow:hidden;">
+          <!-- Header -->
+          <tr>
+            <td style="background:${BRAND.gradient};padding:32px 32px;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td style="vertical-align:middle;">
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td style="background:rgba(255,255,255,0.18);border-radius:10px;width:40px;height:40px;text-align:center;vertical-align:middle;font-size:24px;font-weight:700;color:#fff;line-height:40px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">k</td>
+                        <td style="padding-left:12px;font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.92);">creativekat<span style="color:rgba(255,255,255,0.7);">.studio</span></td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <!-- Body -->
+          <tr>
+            <td style="padding:32px 32px 8px 32px;font-size:16px;line-height:1.6;color:${BRAND.text};">
+              ${inner}
+            </td>
+          </tr>
+          <!-- Footer -->
+          <tr>
+            <td style="padding:24px 32px 28px 32px;border-top:1px solid ${BRAND.border};font-size:12px;line-height:1.6;color:${BRAND.muted};font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td style="font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:${BRAND.muted};">est. 2026 — small, careful digital products.</td>
+                </tr>
+                <tr>
+                  <td style="padding-top:8px;">
+                    <a href="https://creativekat.studio" style="color:${BRAND.muted};text-decoration:none;">creativekat.studio</a>
+                    &nbsp;·&nbsp;
+                    <a href="mailto:hello@creativekat.studio" style="color:${BRAND.muted};text-decoration:none;">hello@creativekat.studio</a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+}
+
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function nl2br(s: string): string {
+  return escapeHtml(s).replace(/\n/g, "<br />");
+}
+
+export type InquiryFields = {
+  name: string;
+  email: string;
+  company?: string;
+  topic: string;
+  message: string;
+};
+
+export function teamNotification(f: InquiryFields): { html: string; text: string } {
+  const inner = `
+    <p style="margin:0 0 4px 0;font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:${BRAND.muted};">— New inquiry</p>
+    <h1 style="margin:0 0 16px 0;font-size:22px;font-weight:600;line-height:1.3;color:${BRAND.text};">${escapeHtml(f.name)} sent a note.</h1>
+
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:20px 0 24px 0;border:1px solid ${BRAND.border};border-radius:12px;overflow:hidden;">
+      <tr>
+        <td style="padding:14px 18px;background:${BRAND.bg};border-bottom:1px solid ${BRAND.border};">
+          <table role="presentation" width="100%"><tr>
+            <td style="font-size:12px;color:${BRAND.muted};">From</td>
+            <td align="right" style="font-size:14px;color:${BRAND.text};">
+              <a href="mailto:${escapeHtml(f.email)}" style="color:${BRAND.text};text-decoration:none;">${escapeHtml(f.email)}</a>
+            </td>
+          </tr></table>
+        </td>
+      </tr>
+      ${f.company ? `<tr>
+        <td style="padding:14px 18px;background:${BRAND.bg};border-bottom:1px solid ${BRAND.border};">
+          <table role="presentation" width="100%"><tr>
+            <td style="font-size:12px;color:${BRAND.muted};">Company / project</td>
+            <td align="right" style="font-size:14px;color:${BRAND.text};">${escapeHtml(f.company)}</td>
+          </tr></table>
+        </td>
+      </tr>` : ""}
+      <tr>
+        <td style="padding:14px 18px;background:${BRAND.bg};">
+          <table role="presentation" width="100%"><tr>
+            <td style="font-size:12px;color:${BRAND.muted};">Topic</td>
+            <td align="right" style="font-size:14px;color:${BRAND.text};">${escapeHtml(f.topic)}</td>
+          </tr></table>
+        </td>
+      </tr>
+    </table>
+
+    <p style="margin:0 0 8px 0;font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:${BRAND.muted};">— Message</p>
+    <div style="font-size:15px;line-height:1.7;color:${BRAND.text};white-space:pre-wrap;">${nl2br(f.message)}</div>
+
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:28px 0 8px 0;">
+      <tr>
+        <td style="background:${BRAND.gradient};border-radius:999px;">
+          <a href="mailto:${escapeHtml(f.email)}?subject=${encodeURIComponent("Re: your note to creativekat studio")}"
+             style="display:inline-block;padding:12px 22px;font-size:14px;font-weight:500;color:#ffffff;text-decoration:none;">
+            Reply to ${escapeHtml(f.name.split(" ")[0])} →
+          </a>
+        </td>
+      </tr>
+    </table>
+  `;
+
+  const text = [
+    `New inquiry — ${f.name}`,
+    "",
+    `From: ${f.email}`,
+    f.company ? `Company: ${f.company}` : null,
+    `Topic: ${f.topic}`,
+    "",
+    "Message:",
+    f.message,
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  return {
+    html: shell(inner, `New inquiry from ${f.name} — ${f.topic}`),
+    text,
+  };
+}
+
+export function autoReply(f: InquiryFields): { html: string; text: string } {
+  const firstName = f.name.split(" ")[0];
+
+  const inner = `
+    <p style="margin:0 0 4px 0;font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:${BRAND.muted};">— We got it</p>
+    <h1 style="margin:0 0 16px 0;font-size:24px;font-weight:600;line-height:1.3;color:${BRAND.text};">Thanks, ${escapeHtml(firstName)} — your note landed safely.</h1>
+
+    <p style="margin:0 0 16px 0;font-size:16px;line-height:1.7;color:${BRAND.text};">
+      We read every message that comes through here. Expect a reply within
+      <strong>1–3 business days</strong>, usually sooner.
+    </p>
+    <p style="margin:0 0 24px 0;font-size:16px;line-height:1.7;color:${BRAND.text};">
+      In the meantime, feel free to take a look around the studio:
+    </p>
+
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 28px 0;">
+      <tr>
+        <td style="padding-right:8px;">
+          <a href="https://disenio.studio" style="display:inline-block;padding:10px 16px;border:1px solid ${BRAND.border};border-radius:999px;font-size:14px;color:${BRAND.text};text-decoration:none;">diseño.studio ↗</a>
+        </td>
+        <td>
+          <a href="https://creativekat.studio" style="display:inline-block;padding:10px 16px;border:1px solid ${BRAND.border};border-radius:999px;font-size:14px;color:${BRAND.text};text-decoration:none;">creativekat.studio ↗</a>
+        </td>
+      </tr>
+    </table>
+
+    <p style="margin:0 0 8px 0;font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:${BRAND.muted};">— Your message</p>
+    <div style="margin:0 0 8px 0;padding:14px 16px;background:${BRAND.bg};border:1px solid ${BRAND.border};border-radius:10px;font-size:14px;line-height:1.7;color:${BRAND.muted};white-space:pre-wrap;">${nl2br(f.message)}</div>
+
+    <p style="margin:24px 0 0 0;font-size:14px;line-height:1.7;color:${BRAND.muted};">
+      Just hit reply if you forgot to add something — this thread will route to us directly.
+    </p>
+  `;
+
+  const text = [
+    `Hi ${firstName},`,
+    "",
+    "Thanks for reaching out to creativekat studio — your note landed safely. We read every message and reply within 1–3 business days, usually sooner.",
+    "",
+    "For reference, here's what you sent:",
+    "",
+    f.message,
+    "",
+    "Just hit reply if you forgot to add something.",
+    "",
+    "—",
+    "creativekat.studio",
+    "hello@creativekat.studio",
+  ].join("\n");
+
+  return {
+    html: shell(
+      inner,
+      `Thanks ${firstName} — we got your note and will reply within 1–3 business days.`,
+    ),
+    text,
+  };
+}

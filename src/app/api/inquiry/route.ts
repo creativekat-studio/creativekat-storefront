@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { autoReply, teamNotification } from "@/lib/email";
 
 type Payload = {
   name?: string;
@@ -42,17 +43,18 @@ export async function POST(req: Request) {
     );
   }
 
-  const subject = `creativekat inquiry — ${body.topic ?? "general"} — ${name}`;
-  const text = [
-    `Name: ${name}`,
-    `Email: ${email}`,
-    body.company ? `Company: ${body.company}` : null,
-    `Topic: ${body.topic ?? "general"}`,
-    "",
+  const fields = {
+    name,
+    email,
+    company: body.company?.trim() || undefined,
+    topic: body.topic?.trim() || "general",
     message,
-  ]
-    .filter(Boolean)
-    .join("\n");
+  };
+
+  // Inbox-friendly subject: [topic] Name — creativekat inquiry
+  const subject = `[${fields.topic}] ${name} — creativekat inquiry`;
+  const team = teamNotification(fields);
+  const reply = autoReply(fields);
 
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.INQUIRY_FROM ?? "creativekat <onboarding@resend.dev>";
@@ -61,7 +63,7 @@ export async function POST(req: Request) {
     console.warn(
       "[inquiry] RESEND_API_KEY not set — logging instead of sending.",
     );
-    console.log({ to: TO, subject, text });
+    console.log({ to: TO, subject, text: team.text });
     return NextResponse.json({ ok: true, delivered: false });
   }
 
@@ -76,7 +78,8 @@ export async function POST(req: Request) {
       to: [TO],
       reply_to: email,
       subject,
-      text,
+      html: team.html,
+      text: team.text,
     }),
   });
 
@@ -101,19 +104,8 @@ export async function POST(req: Request) {
       to: [email],
       reply_to: TO,
       subject: "We got your note — creativekat studio",
-      text: [
-        `Hi ${name.split(" ")[0]},`,
-        "",
-        "Thanks for reaching out to creativekat studio — your note landed safely. We read every message and reply within a few days.",
-        "",
-        "For reference, here's what you sent:",
-        "",
-        message,
-        "",
-        "—",
-        "creativekat.studio",
-        "hello@creativekat.studio",
-      ].join("\n"),
+      html: reply.html,
+      text: reply.text,
     }),
   }).catch((err) => console.error("[inquiry] auto-reply failed", err));
 
