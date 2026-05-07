@@ -38,10 +38,12 @@ export default async function BrandCaseStudy({
   const cs = getCaseStudy(slug);
   if (!cs) notFound();
 
-  // Auto-discover any files dropped into /public/{slug}-creative/gallery/
+  // Auto-discover any files dropped into /public/{assetFolder ?? slug-creative}/gallery/
   // Manual `cs.gallery` (if set) takes precedence.
   const galleryFiles =
-    cs.gallery && cs.gallery.length > 0 ? cs.gallery : readGallery(slug);
+    cs.gallery && cs.gallery.length > 0
+      ? cs.gallery
+      : readGallery(slug, cs.assetFolder);
 
   // Next case study (wraps to the first when on the last one).
   const idx = caseStudies.findIndex((c) => c.slug === slug);
@@ -81,6 +83,12 @@ export default async function BrandCaseStudy({
         />
         <div className="relative mx-auto max-w-5xl px-6 py-16 sm:py-20">
           <div className="flex flex-wrap items-center gap-2">
+            {cs.status && (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--surface)]/60 px-2.5 py-0.5 font-mono text-[11px] uppercase tracking-widest text-[var(--foreground)] backdrop-blur">
+                <span className="inline-block size-1.5 rounded-full bg-emerald-500" />
+                {cs.status}
+              </span>
+            )}
             {cs.tags.map((t) => (
               <span
                 key={t}
@@ -106,7 +114,7 @@ export default async function BrandCaseStudy({
                 rel="noreferrer"
                 className="rounded-full bg-gradient-to-r from-violet-600 to-blue-600 px-5 py-2.5 text-sm font-medium text-white shadow-[0_8px_30px_-8px_rgba(79,70,229,0.6)] transition hover:brightness-110"
               >
-                Visit Social Media ↗
+                {cs.liveUrlLabel ?? "Visit Social Media"} ↗
               </a>
               {cs.liveUrlNote && (
                 <span className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-widest text-[var(--muted)]">
@@ -143,6 +151,21 @@ export default async function BrandCaseStudy({
         </div>
       </section>
 
+      {/* Hero asset (conditional) */}
+      {cs.heroImage && (
+        <section className="border-b border-[var(--border)]">
+          <div className="mx-auto max-w-5xl px-6 py-12">
+            <AssetSlot
+              src={cs.heroImage}
+              alt={`${cs.title} — featured`}
+              aspect="aspect-[16/10]"
+              label="Hero asset · 16:10"
+              priority
+            />
+          </div>
+        </section>
+      )}
+
       {/* Summary */}
       <section className="border-b border-[var(--border)]">
         <div className="mx-auto max-w-5xl px-6 py-16 sm:py-20">
@@ -161,7 +184,8 @@ export default async function BrandCaseStudy({
         </div>
       </section>
 
-      {/* Brand system */}
+      {/* Brand system (conditional — only when defined) */}
+      {cs.brandSystem && (
       <section className="border-b border-[var(--border)]">
         <div className="mx-auto max-w-5xl px-6 py-16 sm:py-20">
           <div className="grid gap-12 md:grid-cols-12">
@@ -250,6 +274,7 @@ export default async function BrandCaseStudy({
           </div>
         </div>
       </section>
+      )}
 
       {/* Body sections */}
       {cs.sections.map((s, i) => (
@@ -338,7 +363,7 @@ function BodySection({
             </h2>
           </div>
           <div className="md:col-span-8 space-y-6">
-            {section.paragraphs.map((p, i) => (
+            {section.paragraphs?.map((p, i) => (
               <p
                 key={i}
                 className={
@@ -351,7 +376,38 @@ function BodySection({
               </p>
             ))}
 
-            {/* TODO: media assets for section "{section.heading}" of {slug} */}
+            {/* Feature grid — 1/2/4 cols */}
+            {section.features && section.features.length > 0 && (
+              <ul
+                className={`mt-2 grid gap-px overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--border)] sm:grid-cols-2 ${
+                  section.features.length >= 4 ? "lg:grid-cols-4" : ""
+                }`}
+              >
+                {section.features.map((f) => (
+                  <li
+                    key={f.label}
+                    className="flex flex-col gap-3 bg-[var(--background)] p-5"
+                  >
+                    {f.image && (
+                      <AssetSlot
+                        src={f.image}
+                        alt={f.label}
+                        aspect="aspect-[16/10]"
+                        label={f.label}
+                      />
+                    )}
+                    <div>
+                      <p className="font-mono text-[11px] uppercase tracking-widest text-[var(--muted)]">
+                        {f.label}
+                      </p>
+                      <p className="mt-2 text-sm leading-relaxed">{f.body}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            {/* Section media row */}
             {section.media && section.media.length > 0 && (
               <ul className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
                 {section.media.map((src, i) => (

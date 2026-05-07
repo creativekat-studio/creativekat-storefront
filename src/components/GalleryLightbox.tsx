@@ -139,7 +139,7 @@ export default function GalleryLightbox({ items }: { items: Item[] }) {
 function Tile({ item, onOpen }: { item: Item; onOpen: () => void }) {
   const isVideo = !!item.src && VIDEO_RE.test(item.src);
   const wrapper =
-    "group relative aspect-[4/5] w-full overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)]";
+    "group relative aspect-[16/10] w-full overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)]";
 
   if (!item.src) {
     return (

@@ -337,18 +337,30 @@ function Stat({ label, value }: { label: string; value: string | number }) {
 }
 
 function ProductCard({ p, index }: { p: Product; index: number }) {
-  const internal = p.caseStudy === true;
-  const href = internal ? `/brands/${p.caseStudySlug ?? p.slug}` : p.url;
-  const linkProps = internal
-    ? {}
-    : { target: "_blank" as const, rel: "noreferrer" };
+  const isExternalUrl = /^https?:\/\//.test(p.url);
+  const caseStudyHref = p.caseStudy
+    ? `/brands/${p.caseStudySlug ?? p.slug}`
+    : null;
+  // Show "View case study" beside the primary link only when the primary
+  // link is external (otherwise the primary link IS the case study).
+  const showCaseStudyLink = isExternalUrl && !!caseStudyHref;
+
+  // Card image: prefer external live URL when present; else case study; else `p.url`.
+  const imageHref = isExternalUrl ? p.url : (caseStudyHref ?? p.url);
+  const imageLinkProps = isExternalUrl
+    ? { target: "_blank" as const, rel: "noreferrer" as const }
+    : {};
+
+  const primaryLinkProps = isExternalUrl
+    ? { target: "_blank" as const, rel: "noreferrer" as const }
+    : {};
 
   return (
     <li className="card-accent group relative flex flex-col overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] transition">
       {p.image && (
         <Link
-          href={href}
-          {...linkProps}
+          href={imageHref}
+          {...imageLinkProps}
           aria-label={`Open ${p.name}`}
           className="relative block aspect-[16/10] overflow-hidden border-b border-[var(--border)] bg-[var(--background)]"
         >
@@ -394,14 +406,24 @@ function ProductCard({ p, index }: { p: Product; index: number }) {
         <p className="mt-4 text-sm leading-relaxed text-[var(--muted)]">
           {p.description}
         </p>
-        <div className="mt-8 flex items-center justify-between">
-          <Link
-            href={href}
-            {...linkProps}
-            className="text-sm font-medium underline decoration-dotted underline-offset-4 transition hover:decoration-solid"
-          >
-            {p.urlLabel} {internal ? "→" : "↗"}
-          </Link>
+        <div className="mt-8 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            <Link
+              href={p.url}
+              {...primaryLinkProps}
+              className="text-sm font-medium underline decoration-dotted underline-offset-4 transition hover:decoration-solid"
+            >
+              {p.urlLabel} {isExternalUrl ? "↗" : "→"}
+            </Link>
+            {showCaseStudyLink && caseStudyHref && (
+              <Link
+                href={caseStudyHref}
+                className="text-sm font-medium text-[var(--muted)] underline decoration-dotted underline-offset-4 transition hover:text-[var(--foreground)] hover:decoration-solid"
+              >
+                View case study →
+              </Link>
+            )}
+          </div>
           {p.tags && (
             <ul className="flex flex-wrap gap-1.5">
               {p.tags.map((t) => (

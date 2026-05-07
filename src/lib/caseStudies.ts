@@ -1,26 +1,47 @@
+export type CaseStudyFeature = {
+  label: string;
+  body: string;
+  image?: string;
+};
+
+export type CaseStudySection = {
+  heading: string;
+  paragraphs?: string[];
+  media?: string[];
+  /** When set, renders a feature grid below any paragraphs. */
+  features?: CaseStudyFeature[];
+};
+
 export type CaseStudy = {
   slug: string;
   title: string;
   description: string;
   tags: string[];
+  /** Free-form status pill displayed in the hero (e.g. "Beta · Live"). */
+  status?: string;
   liveUrl?: string;
   liveUrlNote?: string;
+  /** Override label for the live-URL CTA (default: "Visit Social Media"). */
+  liveUrlLabel?: string;
+  /**
+   * Override the public folder used for gallery auto-discovery and the
+   * default brand system description hint. Defaults to "{slug}-creative".
+   */
+  assetFolder?: string;
   meta: {
     role: string;
     timeline: string;
+    /** Stack items rendered as-is; placeholder strings allowed. */
     stack: string[];
   };
   summary: string;
-  brandSystem: {
+  /** Brand system block is optional — omit for product/engineering case studies. */
+  brandSystem?: {
     description: string;
     typography: { name: string; role: string; fontFamily: string }[];
     colors: { name: string; hex: string }[];
   };
-  sections: {
-    heading: string;
-    paragraphs: string[];
-    media?: string[];
-  }[];
+  sections: CaseStudySection[];
 
   // All asset fields are optional — the page renders placeholder slots
   // when missing. Wire real assets by setting paths here, e.g.:
@@ -142,6 +163,69 @@ export const caseStudies: CaseStudy[] = [
     logoLight: "/no-bent-corners-creative/logo-light.png",
     logoDark: "/no-bent-corners-creative/logo-dark.png",
     logoScale: 1.1,
+  },
+
+  {
+    slug: "no-bent-corners-storefront",
+    title: "nobentcorners.store",
+    description:
+      "TCG vendor site — inventory, pricelists, and buy/sell/trade tagging — built so any vendor can run their own branded shop on the same platform.",
+    tags: ["Commerce", "Inventory tool", "White-label"],
+    status: "Beta · Live",
+    liveUrl: "https://nobentcorners.store",
+    liveUrlLabel: "Visit live",
+    liveUrlNote: "refresh in progress",
+    assetFolder: "no-bent-corners-store",
+    meta: {
+      role: "Founder • product • engineering",
+      timeline: "2023 — Present (refresh in progress)",
+      // Stack placeholders — replace with actual entries (Next.js / Stripe / Postgres / etc.)
+      stack: ["Stack item 01", "Stack item 02", "Stack item 03"],
+    },
+    summary:
+      "A live TCG vendor site engineered and operated for No Bent Corners Collectibles. Inventory management, pricelists, and a buy / sell / trade tagging system built from the ground up — and packaged so any vendor in the space can run their own branded shop on the same platform. Currently in beta; refresh in progress.",
+    sections: [
+      {
+        heading: "The problem",
+        paragraphs: [
+          "TCG vendors juggle spreadsheets, multiple marketplaces, and ad-hoc DM negotiations — there's no single tool that handles inventory, condition grading, and buy/sell/trade flow under one roof, branded as their own shop.",
+        ],
+      },
+      {
+        heading: "What No Bent Corners does",
+        features: [
+          {
+            label: "Inventory & pricelists",
+            body: "Single source of truth for stock, condition, and price across listings.",
+          },
+          {
+            label: "Buy / Sell / Trade tagging",
+            body: "Every card carries a BST status, so the site supports the three-way flow vendors actually run, not just retail.",
+          },
+          {
+            label: "Mint-condition standard",
+            body: "Grading and authenticity built into the listing process so trust signals are automatic.",
+          },
+          {
+            label: "White-label architecture",
+            body: "Any vendor can spin up their own branded instance of the same engine.",
+          },
+        ],
+      },
+      {
+        heading: "Highlights",
+        paragraphs: [
+          "Catalog, product detail, inventory admin, BST flow, and mobile views — drop screenshots into /public/no-bent-corners-store/gallery/ and they auto-populate the gallery below.",
+        ],
+      },
+      {
+        heading: "What's next",
+        paragraphs: [
+          "Refresh is in progress — refining the catalog UX, expanding inventory tools, and packaging the engine so additional vendors can launch their own branded shops on the same platform.",
+        ],
+      },
+    ],
+    heroImage: "/no-bent-corners-store/featured.mov",
   },
 ];
 

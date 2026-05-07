@@ -3,6 +3,11 @@ export type Product = {
   name: string;
   tagline: string;
   description: string;
+  /**
+   * Primary destination. When `caseStudy` is true and no external `url` is
+   * given, the card links inward to `/brands/{caseStudySlug ?? slug}`.
+   * When set to an external URL alongside `caseStudy`, both links render.
+   */
   url: string;
   urlLabel: string;
   status: "Live" | "Beta" | "Coming soon";
@@ -10,8 +15,6 @@ export type Product = {
   tags?: string[];
   image?: string;
   imageAlt?: string;
-  // When true, ProductCard links inward to /brands/{caseStudySlug ?? slug}
-  // instead of the external `url`.
   caseStudy?: boolean;
   caseStudySlug?: string;
 };
@@ -33,16 +36,21 @@ export const products: Product[] = [
     imageAlt: "disenio.studio — a design toolkit with a feel",
   },
   {
-    slug: "nobentcorners-store",
+    slug: "no-bent-corners-storefront",
     name: "nobentcorners.store",
-    tagline: "TODO: one-line tagline.",
+    tagline:
+      "TCG vendor site — inventory, pricelists, and buy/sell/trade tagging.",
     description:
-      "TODO: short paragraph describing what nobentcorners.store does and who it's for.",
+      "Built so any vendor in the space can run their own branded shop on the same platform — currently in beta with a refresh in progress.",
     url: "https://nobentcorners.store",
-    urlLabel: "nobentcorners.store",
+    urlLabel: "Visit live",
     status: "Beta",
     year: "2026",
-    tags: ["TODO"],
+    tags: ["commerce", "white-label"],
+    caseStudy: true,
+    caseStudySlug: "no-bent-corners-storefront",
+    image: "/no-bent-corners-store/thumbnail.png",
+    imageAlt: "nobentcorners.store — TCG vendor site",
   },
 ];
 
