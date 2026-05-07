@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { products } from "@/lib/products";
+import { products, brands, type Product } from "@/lib/products";
 import { buildLog } from "@/lib/buildLog";
 import InquiryForm from "@/components/InquiryForm";
 
@@ -154,85 +154,7 @@ export default function Home() {
           </div>
           <ul className="grid gap-6 sm:grid-cols-2">
             {products.map((p, i) => (
-              <li
-                key={p.slug}
-                className="card-accent group relative flex flex-col overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] transition"
-              >
-                {p.image && (
-                  <a
-                    href={p.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    aria-label={`Open ${p.name}`}
-                    className="relative block aspect-[16/10] overflow-hidden border-b border-[var(--border)] bg-[var(--background)]"
-                  >
-                    <Image
-                      src={p.image}
-                      alt={p.imageAlt ?? p.name}
-                      fill
-                      sizes="(min-width: 640px) 50vw, 100vw"
-                      className="object-cover object-top transition duration-500 group-hover:scale-[1.02]"
-                    />
-                    <div
-                      aria-hidden
-                      className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100 dark:from-black/30"
-                    />
-                  </a>
-                )}
-                <div className="relative p-6">
-                {/* subtle corner gradient */}
-                <div
-                  aria-hidden
-                  className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-gradient-to-br from-violet-600/20 to-blue-600/20 opacity-0 blur-2xl transition-opacity duration-500 group-hover:opacity-100"
-                />
-                <div className="flex items-center justify-between">
-                  <span className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-widest text-[var(--muted)]">
-                    <span
-                      className={`inline-block size-1.5 rounded-full ${
-                        p.status === "Live"
-                          ? "bg-emerald-500"
-                          : p.status === "Beta"
-                            ? "bg-amber-500"
-                            : "bg-neutral-400"
-                      }`}
-                    />
-                    {p.status}
-                  </span>
-                  <span className="font-mono text-xs text-[var(--muted)]">
-                    {String(i + 1).padStart(2, "0")} / {p.year}
-                  </span>
-                </div>
-                <h3 className="mt-8 text-3xl font-semibold tracking-tight">
-                  {p.name}
-                </h3>
-                <p className="mt-2 text-[var(--muted)]">{p.tagline}</p>
-                <p className="mt-4 text-sm leading-relaxed text-[var(--muted)]">
-                  {p.description}
-                </p>
-                <div className="mt-8 flex items-center justify-between">
-                  <a
-                    href={p.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-sm font-medium underline decoration-dotted underline-offset-4 transition hover:decoration-solid"
-                  >
-                    {p.urlLabel} ↗
-                  </a>
-                  {p.tags && (
-                    <ul className="flex flex-wrap gap-1.5">
-                      {p.tags.map((t) => (
-                        <li
-                          key={t}
-                          className="rounded-full border border-[var(--border)] px-2 py-0.5 text-xs text-[var(--muted)]"
-                        >
-                          {t}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-                </div>
-              </li>
+              <ProductCard key={p.slug} p={p} index={i} />
             ))}
 
             {/* "more on the way" placeholder card */}
@@ -255,6 +177,34 @@ export default function Home() {
                 Get notified →
               </Link>
             </li>
+          </ul>
+        </div>
+      </section>
+
+      {/* Creative brands */}
+      <section
+        id="brands"
+        className="relative border-b border-[var(--border)]"
+      >
+        <div className="mx-auto max-w-5xl px-6 py-16">
+          <div className="mb-10 flex items-end justify-between gap-6">
+            <div>
+              <p className="font-mono text-xs uppercase tracking-widest text-[var(--muted)]">
+                — Creative brands
+              </p>
+              <h2 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
+                Online{" "}
+                <span className="brand-gradient">stores</span> & identities.
+              </h2>
+            </div>
+            <p className="hidden text-sm text-[var(--muted)] sm:block">
+              {brands.length} brands · more on the way
+            </p>
+          </div>
+          <ul className="grid gap-6 sm:grid-cols-2">
+            {brands.map((p, i) => (
+              <ProductCard key={p.slug} p={p} index={i} />
+            ))}
           </ul>
         </div>
       </section>
@@ -383,6 +333,90 @@ function Stat({ label, value }: { label: string; value: string | number }) {
         {value}
       </dd>
     </div>
+  );
+}
+
+function ProductCard({ p, index }: { p: Product; index: number }) {
+  const internal = p.caseStudy === true;
+  const href = internal ? `/brands/${p.caseStudySlug ?? p.slug}` : p.url;
+  const linkProps = internal
+    ? {}
+    : { target: "_blank" as const, rel: "noreferrer" };
+
+  return (
+    <li className="card-accent group relative flex flex-col overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] transition">
+      {p.image && (
+        <Link
+          href={href}
+          {...linkProps}
+          aria-label={`Open ${p.name}`}
+          className="relative block aspect-[16/10] overflow-hidden border-b border-[var(--border)] bg-[var(--background)]"
+        >
+          <Image
+            src={p.image}
+            alt={p.imageAlt ?? p.name}
+            fill
+            sizes="(min-width: 640px) 50vw, 100vw"
+            className="object-cover object-top transition duration-500 group-hover:scale-[1.02]"
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100 dark:from-black/30"
+          />
+        </Link>
+      )}
+      <div className="relative p-6">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-gradient-to-br from-violet-600/20 to-blue-600/20 opacity-0 blur-2xl transition-opacity duration-500 group-hover:opacity-100"
+        />
+        <div className="flex items-center justify-between">
+          <span className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-widest text-[var(--muted)]">
+            <span
+              className={`inline-block size-1.5 rounded-full ${
+                p.status === "Live"
+                  ? "bg-emerald-500"
+                  : p.status === "Beta"
+                    ? "bg-amber-500"
+                    : "bg-neutral-400"
+              }`}
+            />
+            {p.status}
+          </span>
+          <span className="font-mono text-xs text-[var(--muted)]">
+            {String(index + 1).padStart(2, "0")} / {p.year}
+          </span>
+        </div>
+        <h3 className="mt-8 text-3xl font-semibold tracking-tight">
+          {p.name}
+        </h3>
+        <p className="mt-2 text-[var(--muted)]">{p.tagline}</p>
+        <p className="mt-4 text-sm leading-relaxed text-[var(--muted)]">
+          {p.description}
+        </p>
+        <div className="mt-8 flex items-center justify-between">
+          <Link
+            href={href}
+            {...linkProps}
+            className="text-sm font-medium underline decoration-dotted underline-offset-4 transition hover:decoration-solid"
+          >
+            {p.urlLabel} {internal ? "→" : "↗"}
+          </Link>
+          {p.tags && (
+            <ul className="flex flex-wrap gap-1.5">
+              {p.tags.map((t) => (
+                <li
+                  key={t}
+                  className="rounded-full border border-[var(--border)] px-2 py-0.5 text-xs text-[var(--muted)]"
+                >
+                  {t}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+    </li>
   );
 }
 
