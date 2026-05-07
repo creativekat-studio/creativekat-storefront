@@ -80,7 +80,7 @@ export default function RootLayout({
             <p>© {new Date().getFullYear()} creativekat studio</p>
             <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
               <a
-                href="https://annmantele.com"
+                href="https://annmantele.dev"
                 target="_blank"
                 rel="noreferrer"
                 className="hover:underline"
