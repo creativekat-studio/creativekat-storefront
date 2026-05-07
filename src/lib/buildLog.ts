@@ -10,7 +10,7 @@ export const buildLog: LogEntry[] = [
   {
     date: "2026-05-06",
     product: "creativekat",
-    title: "Storefront online.",
+    title: "creativekat.studio launched.",
     note: "First version — products list, inquiry form, build log.",
   },
   {
