@@ -83,6 +83,154 @@ function nl2br(s: string): string {
   return escapeHtml(s).replaceAll("\n", "<br />");
 }
 
+export type ProjectBriefFields = {
+  name: string;
+  email: string;
+  company?: string;
+  link?: string;
+  projectType: string;
+  projectTypeLabel: string;
+  summary: string;
+  // Free-form record of all the conditional fields, rendered as a list.
+  details: { label: string; value: string }[];
+  timeline?: string;
+  budget?: string;
+  approver?: string;
+  extras?: string;
+};
+
+export function projectBriefNotification(
+  f: ProjectBriefFields,
+): { html: string; text: string } {
+  const detailRow = (label: string, value?: string) =>
+    value
+      ? `<tr><td style="padding:10px 18px;background:${BRAND.bg};border-bottom:1px solid ${BRAND.border};font-size:12px;color:${BRAND.muted};vertical-align:top;width:30%;">${escapeHtml(label)}</td><td style="padding:10px 18px;background:${BRAND.bg};border-bottom:1px solid ${BRAND.border};font-size:14px;color:${BRAND.text};vertical-align:top;">${nl2br(value)}</td></tr>`
+      : "";
+
+  const detailsHtml = f.details
+    .filter((d) => d.value && d.value.trim())
+    .map((d) => detailRow(d.label, d.value))
+    .join("");
+
+  const inner = `
+    <p style="margin:0 0 4px 0;font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:${BRAND.muted};">— New project brief</p>
+    <h1 style="margin:0 0 8px 0;font-size:22px;font-weight:600;line-height:1.3;color:${BRAND.text};">${escapeHtml(f.name)} — ${escapeHtml(f.projectTypeLabel)}</h1>
+    <p style="margin:0 0 20px 0;font-size:15px;line-height:1.6;color:${BRAND.text};">${escapeHtml(f.summary)}</p>
+
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 24px 0;border:1px solid ${BRAND.border};border-radius:12px;overflow:hidden;">
+      ${detailRow("From", `<a href="mailto:${escapeHtml(f.email)}" style="color:${BRAND.text};text-decoration:none;">${escapeHtml(f.email)}</a>`)}
+      ${f.company ? detailRow("Company / brand", escapeHtml(f.company)) : ""}
+      ${f.link ? detailRow("Link", `<a href="${escapeHtml(f.link)}" style="color:${BRAND.text};text-decoration:none;">${escapeHtml(f.link)}</a>`) : ""}
+      ${detailRow("Project type", escapeHtml(f.projectTypeLabel))}
+    </table>
+
+    ${
+      detailsHtml
+        ? `
+    <p style="margin:0 0 8px 0;font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:${BRAND.muted};">— Project details</p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 24px 0;border:1px solid ${BRAND.border};border-radius:12px;overflow:hidden;">${detailsHtml}</table>
+    `
+        : ""
+    }
+
+    <p style="margin:0 0 8px 0;font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:${BRAND.muted};">— Logistics</p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 24px 0;border:1px solid ${BRAND.border};border-radius:12px;overflow:hidden;">
+      ${detailRow("Timeline", f.timeline ? escapeHtml(f.timeline) : "")}
+      ${detailRow("Budget", f.budget ? escapeHtml(f.budget) : "")}
+      ${detailRow("Final approval", f.approver ? escapeHtml(f.approver) : "")}
+      ${detailRow("Anything else", f.extras ? escapeHtml(f.extras) : "")}
+    </table>
+
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:20px 0 8px 0;">
+      <tr>
+        <td style="background:${BRAND.gradient};border-radius:999px;">
+          <a href="mailto:${escapeHtml(f.email)}?subject=${encodeURIComponent(`Re: your ${f.projectTypeLabel.toLowerCase()} brief — creativekat studio`)}"
+             style="display:inline-block;padding:12px 22px;font-size:14px;font-weight:500;color:#ffffff;text-decoration:none;">
+            Reply to ${escapeHtml(f.name.split(" ")[0])} →
+          </a>
+        </td>
+      </tr>
+    </table>
+  `;
+
+  const lines = [
+    `New project brief — ${f.name} (${f.projectTypeLabel})`,
+    "",
+    `From: ${f.email}`,
+    f.company ? `Company: ${f.company}` : null,
+    f.link ? `Link: ${f.link}` : null,
+    `Project type: ${f.projectTypeLabel}`,
+    "",
+    "Summary:",
+    f.summary,
+    "",
+  ];
+
+  if (f.details.length) {
+    lines.push("Project details:");
+    for (const d of f.details) {
+      if (d.value && d.value.trim()) lines.push(`  ${d.label}: ${d.value}`);
+    }
+    lines.push("");
+  }
+
+  lines.push("Logistics:");
+  if (f.timeline) lines.push(`  Timeline: ${f.timeline}`);
+  if (f.budget) lines.push(`  Budget: ${f.budget}`);
+  if (f.approver) lines.push(`  Final approval: ${f.approver}`);
+  if (f.extras) lines.push(`  Anything else: ${f.extras}`);
+
+  return {
+    html: shell(inner, `New project brief from ${f.name} — ${f.projectTypeLabel}`),
+    text: lines.filter((l) => l !== null).join("\n"),
+  };
+}
+
+export function projectBriefAutoReply(
+  f: ProjectBriefFields,
+): { html: string; text: string } {
+  const firstName = f.name.split(" ")[0];
+
+  const inner = `
+    <p style="margin:0 0 4px 0;font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:${BRAND.muted};">— Brief received</p>
+    <h1 style="margin:0 0 16px 0;font-size:24px;font-weight:600;line-height:1.3;color:${BRAND.text};">Thanks, ${escapeHtml(firstName)} — got your brief.</h1>
+
+    <p style="margin:0 0 16px 0;font-size:16px;line-height:1.7;color:${BRAND.text};">
+      We&apos;ll read it carefully and reply within <strong>1–3 business days</strong>
+      with next steps and a tailored discovery doc.
+    </p>
+    <p style="margin:0 0 24px 0;font-size:16px;line-height:1.7;color:${BRAND.text};">
+      If anything else surfaces in the meantime, just reply to this thread.
+    </p>
+
+    <p style="margin:0 0 8px 0;font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:${BRAND.muted};">— Your summary</p>
+    <div style="margin:0 0 8px 0;padding:14px 16px;background:${BRAND.bg};border:1px solid ${BRAND.border};border-radius:10px;font-size:14px;line-height:1.7;color:${BRAND.muted};white-space:pre-wrap;">${nl2br(f.summary)}</div>
+  `;
+
+  const text = [
+    `Hi ${firstName},`,
+    "",
+    "Thanks for sending the brief — we'll read it carefully and reply within 1–3 business days with next steps and a tailored discovery doc.",
+    "",
+    "If anything else surfaces in the meantime, just reply to this thread.",
+    "",
+    "Your summary:",
+    f.summary,
+    "",
+    "—",
+    "creativekat.studio",
+    "hello@creativekat.studio",
+  ].join("\n");
+
+  return {
+    html: shell(
+      inner,
+      `Thanks ${firstName} — got your brief, we'll reply within 1–3 business days.`,
+    ),
+    text,
+  };
+}
+
 export type InquiryFields = {
   name: string;
   email: string;

@@ -302,6 +302,21 @@ export default function Home() {
                 hello@creativekat.studio
               </a>.
             </p>
+            <div className="mt-6 rounded-2xl border border-[var(--border)] bg-[var(--surface)]/60 p-5 backdrop-blur">
+              <p className="font-mono text-[11px] uppercase tracking-widest text-[var(--muted)]">
+                — Ready to start something?
+              </p>
+              <p className="mt-2 text-sm text-[var(--foreground)]">
+                If you know what you want built — a logo, a brand system, a
+                website, a shop — skip the quick note and fill in a brief.
+              </p>
+              <Link
+                href="/brief"
+                className="mt-4 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-violet-600 to-blue-600 px-4 py-2 text-sm font-medium text-white shadow-[0_8px_30px_-8px_rgba(79,70,229,0.6)] transition hover:brightness-110"
+              >
+                Start a project brief →
+              </Link>
+            </div>
             <dl className="mt-8 space-y-4 text-sm">
               <div>
                 <dt className="text-[var(--muted)]">Email</dt>
