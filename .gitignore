@@ -36,6 +36,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# CRM data (local SQLite + attachments)
+/data/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

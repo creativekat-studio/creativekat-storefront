@@ -83,6 +83,33 @@ function nl2br(s: string): string {
   return escapeHtml(s).replaceAll("\n", "<br />");
 }
 
+function formatBodyHtml(s: string): string {
+  const paragraphs = escapeHtml(s.trim())
+    .split(/\n{2,}/)
+    .map((p) => p.replaceAll("\n", "<br />"))
+    .filter(Boolean);
+
+  if (!paragraphs.length) return "";
+
+  return paragraphs
+    .map(
+      (p, i) =>
+        `<p style="margin:0 0 ${i === paragraphs.length - 1 ? "0" : "10px"} 0;line-height:1.5;color:${BRAND.text};">${p}</p>`,
+    )
+    .join("");
+}
+
+function formatDeliverableDate(stored: string): string {
+  const d = /^\d{4}-\d{2}-\d{2}$/.test(stored)
+    ? new Date(`${stored}T12:00:00`)
+    : new Date(stored);
+  return d.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
 export type ProjectBriefFields = {
   name: string;
   email: string;
@@ -362,6 +389,113 @@ export function autoReply(f: InquiryFields): { html: string; text: string } {
       inner,
       `Thanks ${firstName} — we got your note and will reply within 1–3 business days.`,
     ),
+    text,
+  };
+}
+
+export function adminReplyEmail(input: {
+  name: string;
+  body: string;
+}): { html: string; text: string } {
+  const inner = `
+    <p style="margin:0 0 4px 0;font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:${BRAND.muted};">— Reply from creativekat</p>
+    <div style="font-size:16px;color:${BRAND.text};">${formatBodyHtml(input.body)}</div>
+    <p style="margin:16px 0 0 0;font-size:14px;line-height:1.5;color:${BRAND.muted};">
+      Just reply to this thread if you have questions — it routes straight to us.
+    </p>
+  `;
+
+  const text = [
+    input.body,
+    "",
+    "—",
+    "creativekat.studio",
+    "hello@creativekat.studio",
+  ].join("\n");
+
+  return {
+    html: shell(inner, `Reply from creativekat studio`),
+    text,
+  };
+}
+
+export function deliverablesChecklistBlock(
+  items: { label: string; done: boolean; done_at?: string; sent_at?: string }[],
+): { html: string; text: string } {
+  function statusDate(item: (typeof items)[number]): string {
+    if (item.done && item.done_at) return formatDeliverableDate(item.done_at);
+    if (item.sent_at) return formatDeliverableDate(item.sent_at);
+    return "—";
+  }
+
+  const rows = items
+    .map((item) => {
+      const mark = item.done ? "☑" : item.sent_at ? "◧" : "☐";
+      const date = statusDate(item);
+      return `<tr>
+        <td style="padding:8px 0;font-size:15px;color:#1a1820;width:28px;vertical-align:top;">${mark}</td>
+        <td style="padding:8px 0;font-size:15px;color:#1a1820;vertical-align:top;">${escapeHtml(item.label)}</td>
+        <td style="padding:8px 0;font-size:12px;color:#6b7280;vertical-align:top;text-align:right;white-space:nowrap;">${escapeHtml(date)}</td>
+      </tr>`;
+    })
+    .join("");
+
+  const html = `
+    <p style="margin:16px 0 8px 0;font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#6b7280;">— Deliverables</p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top:1px solid #e7e5e4;padding-top:8px;">
+      ${rows}
+    </table>
+  `;
+
+  const text = [
+    "",
+    "Deliverables:",
+    ...items.map((item) => {
+      const mark = item.done ? "[x]" : item.sent_at ? "[~]" : "[ ]";
+      const date =
+        item.done && item.done_at
+          ? formatDeliverableDate(item.done_at)
+          : item.sent_at
+            ? formatDeliverableDate(item.sent_at)
+            : "";
+      return `  ${mark} ${item.label}${date ? ` — ${date}` : ""}`;
+    }),
+  ].join("\n");
+
+  return { html, text };
+}
+
+export function projectClientEmail(input: {
+  name: string;
+  body: string;
+  deliverables?: { label: string; done: boolean; done_at?: string; sent_at?: string }[];
+}): { html: string; text: string } {
+  const checklist = input.deliverables?.length
+    ? deliverablesChecklistBlock(input.deliverables)
+    : null;
+
+  const inner = `
+    <p style="margin:0 0 4px 0;font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:${BRAND.muted};">— creativekat studio</p>
+    <div style="font-size:16px;color:${BRAND.text};">${formatBodyHtml(input.body)}</div>
+    ${checklist?.html ?? ""}
+    <p style="margin:16px 0 0 0;font-size:14px;line-height:1.5;color:${BRAND.muted};">
+      Reply to this thread if you have questions — it routes straight to us.
+    </p>
+  `;
+
+  const text = [
+    input.body,
+    checklist?.text ?? "",
+    "",
+    "—",
+    "creativekat.studio",
+    "hello@creativekat.studio",
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  return {
+    html: shell(inner, "Update from creativekat studio"),
     text,
   };
 }

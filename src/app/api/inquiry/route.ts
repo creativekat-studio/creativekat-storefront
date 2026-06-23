@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { autoReply, teamNotification } from "@/lib/email";
+import { createLead } from "@/lib/crm/leads";
 
 type Payload = {
   name?: string;
@@ -50,6 +51,20 @@ export async function POST(req: Request) {
     topic: body.topic?.trim() || "general",
     message,
   };
+
+  try {
+    await createLead({
+      source: "inquiry",
+      name: fields.name,
+      email: fields.email,
+      company: fields.company,
+      topic: fields.topic,
+      message: fields.message,
+      raw_payload: body as Record<string, unknown>,
+    });
+  } catch (err) {
+    console.error("[inquiry] CRM save failed", err);
+  }
 
   // Inbox-friendly subject: [topic] Name — creativekat inquiry
   const subject = `[${fields.topic}] ${name} — creativekat inquiry`;

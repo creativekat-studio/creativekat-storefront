@@ -4,6 +4,7 @@ import {
   projectBriefNotification,
   type ProjectBriefFields,
 } from "@/lib/email";
+import { createLead } from "@/lib/crm/leads";
 
 const TO = "hello@creativekat.studio";
 
@@ -110,6 +111,22 @@ export async function POST(req: Request) {
   const subject = `[brief · ${projectTypeLabel}] ${name} — creativekat`;
   const team = projectBriefNotification(fields);
   const reply = projectBriefAutoReply(fields);
+
+  try {
+    await createLead({
+      source: "project-brief",
+      name: fields.name,
+      email: fields.email,
+      company: fields.company,
+      project_type: fields.projectType,
+      project_type_label: fields.projectTypeLabel,
+      summary: fields.summary,
+      message: team.text,
+      raw_payload: body,
+    });
+  } catch (err) {
+    console.error("[project-brief] CRM save failed", err);
+  }
 
   const apiKey = process.env.RESEND_API_KEY;
   const from =
