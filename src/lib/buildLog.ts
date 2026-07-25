@@ -8,11 +8,18 @@ export type LogEntry = {
 // Newest first. Add an entry whenever something ships, breaks, or changes.
 export const buildLog: LogEntry[] = [
   {
+    date: "2026-07-19",
+    product: "studio",
+    title: "Hobby Arena case study published.",
+    note: "Client TCG storefront live on hobbyarena.ph — added to products.",
+  },
+  {
     date: "2026-05-06",
     product: "creativekat",
     title: "creativekat.studio launched.",
     note: "First version — products list, inquiry form, build log.",
   },
+
   {
     date: "2026-05-04",
     product: "disenio.studio",

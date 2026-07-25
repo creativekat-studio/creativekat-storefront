@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { caseStudies, getCaseStudy, type CaseStudy } from "@/lib/caseStudies";
+import { products } from "@/lib/products";
 import { readGallery } from "@/lib/galleryFs";
 import GalleryLightbox from "@/components/GalleryLightbox";
 import LogoDisplay from "@/components/LogoDisplay";
@@ -48,6 +49,11 @@ export default async function BrandCaseStudy({
   // Next case study (wraps to the first when on the last one).
   const idx = caseStudies.findIndex((c) => c.slug === slug);
   const next = caseStudies[(idx + 1) % caseStudies.length];
+  const isProductCaseStudy = products.some(
+    (p) => p.caseStudySlug === slug || p.slug === slug,
+  );
+  const backHref = isProductCaseStudy ? "/#products" : "/#brands";
+  const backLabel = isProductCaseStudy ? "← Back to products" : "← Back to brands";
 
   return (
     <article>
@@ -55,10 +61,10 @@ export default async function BrandCaseStudy({
       <div className="border-b border-[var(--border)]">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-6 py-4 text-sm">
           <Link
-            href="/#brands"
+            href={backHref}
             className="font-mono text-[11px] uppercase tracking-widest text-[var(--muted)] hover:text-[var(--foreground)]"
           >
-            ← Back to brands
+            {backLabel}
           </Link>
           {next && next.slug !== cs.slug && (
             <Link

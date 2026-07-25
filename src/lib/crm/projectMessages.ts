@@ -1,9 +1,9 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { getDb, newId, nowIso } from "@/lib/db";
+import { getDataDir, getDb, newId, nowIso } from "@/lib/db";
 import type { ProjectMessage } from "@/lib/crm/types";
 
-const ATTACHMENTS_DIR = path.join(process.cwd(), "data", "attachments");
+const ATTACHMENTS_DIR = path.join(getDataDir(), "attachments");
 const MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024;
 
 function rowToMessage(row: Record<string, unknown>): ProjectMessage {
@@ -43,7 +43,7 @@ function rowToAttachment(row: Record<string, unknown>): ProjectAttachment {
 export async function listProjectMessages(
   projectId: string,
 ): Promise<ProjectMessage[]> {
-  const db = getDb();
+  const db = await getDb();
   const result = await db.execute({
     sql: "SELECT * FROM project_messages WHERE project_id = ? ORDER BY created_at ASC",
     args: [projectId],
@@ -54,7 +54,7 @@ export async function listProjectMessages(
 export async function listProjectAttachments(
   messageId: string,
 ): Promise<ProjectAttachment[]> {
-  const db = getDb();
+  const db = await getDb();
   const result = await db.execute({
     sql: "SELECT * FROM project_attachments WHERE message_id = ? ORDER BY created_at ASC",
     args: [messageId],
@@ -70,7 +70,7 @@ export async function createProjectOutboundMessage(input: {
   resendId?: string;
   files?: File[];
 }): Promise<{ message: ProjectMessage; attachments: ProjectAttachment[] }> {
-  const db = getDb();
+  const db = await getDb();
   const messageId = newId();
   const ts = nowIso();
 
@@ -162,7 +162,7 @@ export async function loadProjectAttachmentsForResend(
 export async function getProjectAttachmentFile(
   attachmentId: string,
 ): Promise<{ attachment: ProjectAttachment; buffer: Buffer } | null> {
-  const db = getDb();
+  const db = await getDb();
   const result = await db.execute({
     sql: "SELECT * FROM project_attachments WHERE id = ?",
     args: [attachmentId],

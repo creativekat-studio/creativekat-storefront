@@ -56,7 +56,7 @@ export type CreateProjectInput = {
 export type UpdateProjectInput = Partial<CreateProjectInput>;
 
 export async function createProject(input: CreateProjectInput): Promise<Project> {
-  const db = getDb();
+  const db = await getDb();
   const id = newId();
   const ts = nowIso();
   const deliverables = defaultDeliverables(input.project_type);
@@ -101,7 +101,7 @@ export async function createProject(input: CreateProjectInput): Promise<Project>
 export async function listProjects(
   status?: ProjectStatus,
 ): Promise<Project[]> {
-  const db = getDb();
+  const db = await getDb();
   const sql = status
     ? "SELECT * FROM projects WHERE status = ? ORDER BY updated_at DESC"
     : "SELECT * FROM projects ORDER BY updated_at DESC";
@@ -115,7 +115,7 @@ export async function listProjects(
 }
 
 export async function getProject(id: string): Promise<Project | null> {
-  const db = getDb();
+  const db = await getDb();
   const result = await db.execute({
     sql: "SELECT * FROM projects WHERE id = ?",
     args: [id],
@@ -147,7 +147,7 @@ export async function updateProject(
     lead_id: input.lead_id ?? existing.lead_id ?? undefined,
   };
 
-  const db = getDb();
+  const db = await getDb();
   const ts = nowIso();
 
   await db.execute({
@@ -185,7 +185,7 @@ export async function updateProjectDeliverables(
   const existing = await getProject(id);
   if (!existing) return null;
 
-  const db = getDb();
+  const db = await getDb();
   const ts = nowIso();
 
   await db.execute({
@@ -212,7 +212,7 @@ export async function markDeliverableSent(
 }
 
 export async function deleteProject(id: string): Promise<boolean> {
-  const db = getDb();
+  const db = await getDb();
   const result = await db.execute({
     sql: "DELETE FROM projects WHERE id = ?",
     args: [id],
@@ -221,7 +221,7 @@ export async function deleteProject(id: string): Promise<boolean> {
 }
 
 export async function countProjectsByStatus(): Promise<Record<string, number>> {
-  const db = getDb();
+  const db = await getDb();
   const result = await db.execute(
     "SELECT status, COUNT(*) AS count FROM projects GROUP BY status",
   );
@@ -233,7 +233,7 @@ export async function countProjectsByStatus(): Promise<Record<string, number>> {
 }
 
 export async function countActiveProjects(): Promise<number> {
-  const db = getDb();
+  const db = await getDb();
   const result = await db.execute(
     "SELECT COUNT(*) AS count FROM projects WHERE status IN ('discovery', 'active', 'review')",
   );

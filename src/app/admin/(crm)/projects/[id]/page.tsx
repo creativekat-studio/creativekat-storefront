@@ -50,7 +50,15 @@ export default async function ProjectDetailPage({ params }: Props) {
             </span>
           </div>
         </div>
-        <DeleteProjectButton projectId={project.id} />
+        <div className="flex flex-wrap items-center gap-2">
+          <Link
+            href={`/admin/projects/${project.id}/milestone`}
+            className="rounded-full border border-[var(--border)] px-4 py-2 text-sm transition hover:border-[var(--foreground)]"
+          >
+            Milestone completion
+          </Link>
+          <DeleteProjectButton projectId={project.id} />
+        </div>
       </div>
 
       {lead && (

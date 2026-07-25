@@ -124,3 +124,27 @@ body {
 .card-accent:hover::before {
   opacity: 1;
 }
+
+@media print {
+  @page {
+    size: letter;
+    margin: 0.7in;
+  }
+
+  html,
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  header,
+  .print\:hidden {
+    display: none !important;
+  }
+
+  .milestone-doc {
+    box-shadow: none !important;
+    max-width: none !important;
+    padding: 0 !important;
+  }
+}

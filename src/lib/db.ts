@@ -2,13 +2,26 @@ import { createClient, type Client } from "@libsql/client";
 import fs from "node:fs";
 import path from "node:path";
 
-let client: Client | null = null;
-let migrated = false;
+let clientPromise: Promise<Client> | null = null;
+
+export class DbConfigError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "DbConfigError";
+  }
+}
 
 function getDbUrl(): string {
   if (process.env.TURSO_DATABASE_URL) {
     return process.env.TURSO_DATABASE_URL;
   }
+
+  if (process.env.VERCEL === "1") {
+    throw new DbConfigError(
+      "Production needs a Turso database. Add TURSO_DATABASE_URL and TURSO_AUTH_TOKEN to your Vercel environment variables, then redeploy.",
+    );
+  }
+
   const dir = path.join(process.cwd(), "data");
   fs.mkdirSync(dir, { recursive: true });
   return `file:${path.join(dir, "crm.sqlite")}`;
@@ -18,22 +31,27 @@ function getAuthToken(): string | undefined {
   return process.env.TURSO_AUTH_TOKEN;
 }
 
-export function getDb(): Client {
-  if (!client) {
-    client = createClient({
-      url: getDbUrl(),
-      authToken: getAuthToken(),
-    });
+export function getDataDir(): string {
+  if (process.env.TURSO_DATABASE_URL || process.env.VERCEL === "1") {
+    return path.join("/tmp", "creativekat-crm");
   }
-  if (!migrated) {
-    runMigrations(client);
-    migrated = true;
-  }
-  return client;
+  return path.join(process.cwd(), "data");
 }
 
-function runMigrations(db: Client) {
-  db.executeMultiple(`
+export async function getDb(): Promise<Client> {
+  if (!clientPromise) {
+    clientPromise = initDb();
+  }
+  return clientPromise;
+}
+
+async function initDb(): Promise<Client> {
+  const client = createClient({
+    url: getDbUrl(),
+    authToken: getAuthToken(),
+  });
+
+  await client.executeMultiple(`
     CREATE TABLE IF NOT EXISTS projects (
       id TEXT PRIMARY KEY,
       title TEXT NOT NULL,
@@ -116,12 +134,27 @@ function runMigrations(db: Client) {
       FOREIGN KEY (message_id) REFERENCES project_messages(id)
     );
 
+    CREATE TABLE IF NOT EXISTS milestone_documents (
+      id TEXT PRIMARY KEY,
+      project_id TEXT NOT NULL,
+      phase_label TEXT NOT NULL,
+      document_date TEXT NOT NULL,
+      title TEXT NOT NULL,
+      draft_json TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      FOREIGN KEY (project_id) REFERENCES projects(id)
+    );
+
     CREATE INDEX IF NOT EXISTS idx_leads_status ON leads(status);
     CREATE INDEX IF NOT EXISTS idx_leads_created ON leads(created_at);
     CREATE INDEX IF NOT EXISTS idx_projects_status ON projects(status);
     CREATE INDEX IF NOT EXISTS idx_messages_lead ON messages(lead_id);
     CREATE INDEX IF NOT EXISTS idx_project_messages_project ON project_messages(project_id);
+    CREATE INDEX IF NOT EXISTS idx_milestone_documents_project ON milestone_documents(project_id);
   `);
+
+  return client;
 }
 
 export function newId(): string {

@@ -22,6 +22,22 @@ export type Product = {
 // Apps & SaaS — software the studio builds and ships.
 export const products: Product[] = [
   {
+    slug: "hobby-arena",
+    name: "Hobby Arena",
+    tagline: "Custom TCG storefront — live on hobbyarena.ph.",
+    description:
+      "Storefront, pre-orders, customer accounts, and admin for a Philippine sealed-product retailer — designed and shipped end-to-end.",
+    url: "https://www.hobbyarena.ph",
+    urlLabel: "Visit live",
+    status: "Live",
+    year: "2026",
+    tags: ["commerce", "client"],
+    caseStudy: true,
+    caseStudySlug: "hobby-arena",
+    image: "/hobby-arena/featured.mp4",
+    imageAlt: "Hobby Arena — premium TCG online store",
+  },
+  {
     slug: "disenio-studio",
     name: "disenio.studio",
     tagline: "A design toolkit with a feel.",

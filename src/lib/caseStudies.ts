@@ -227,6 +227,62 @@ export const caseStudies: CaseStudy[] = [
     ],
     heroImage: "/no-bent-corners-store/featured.mov",
   },
+
+  {
+    slug: "hobby-arena",
+    title: "Hobby Arena",
+    description:
+      "Custom online store for a Philippine TCG retailer — storefront, pre-orders, customer accounts, and admin — live on hobbyarena.ph.",
+    tags: ["Commerce", "Client work", "TCG"],
+    status: "Live",
+    liveUrl: "https://www.hobbyarena.ph",
+    liveUrlLabel: "Visit live",
+    assetFolder: "hobby-arena",
+    meta: {
+      role: "Design • engineering",
+      timeline: "Jun – Jul 2026",
+      stack: ["React", "Vercel", "Firebase", "Resend"],
+    },
+    summary:
+      "A custom online store for Hobby Arena Marketing Corporation — sealed TCG products, pre-order flows with deposit scheduling, customer accounts, and an admin panel for catalog and order management. Designed and built end-to-end, then launched on hobbyarena.ph.",
+    sections: [
+      {
+        heading: "The brief",
+        paragraphs: [
+          "Hobby Arena needed a store that matched how TCG retail actually runs in the Philippines: sealed product drops, pre-orders below SRP, account-based shopping, and an admin side that could keep catalog and orders moving without a patchwork of spreadsheets and DMs.",
+        ],
+      },
+      {
+        heading: "What shipped",
+        features: [
+          {
+            label: "Storefront & catalog",
+            body: "Dark, drop-led shopping experience with brand browsing, in-stock sealed products, and featured pre-order highlights.",
+          },
+          {
+            label: "Pre-order flow",
+            body: "Coming-soon drops with split payment cues (deposit now / balance later) so collectors can lock in sets before they sell out.",
+          },
+          {
+            label: "Customer accounts",
+            body: "Account access for browsing, ordering, and returning customers — built into the same storefront shell.",
+          },
+          {
+            label: "Admin dashboard",
+            body: "Live sales overview, orders, customers, inventory, classifications, CMS, and email tools — so ops stay in one place after launch.",
+          },
+        ],
+      },
+      {
+        heading: "Launch",
+        paragraphs: [
+          "Shipped to production on hobbyarena.ph after phased delivery — foundation and preview first, then go-live with DNS, third-party services, and client sign-off.",
+        ],
+      },
+    ],
+    heroImage: "/hobby-arena/featured.mp4",
+    thumbnail: "/hobby-arena/thumbnail.jpg",
+  },
 ];
 
 export function getCaseStudy(slug: string): CaseStudy | undefined {

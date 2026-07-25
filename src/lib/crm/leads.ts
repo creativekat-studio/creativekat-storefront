@@ -42,7 +42,7 @@ export type CreateLeadInput = {
 };
 
 export async function createLead(input: CreateLeadInput): Promise<Lead> {
-  const db = getDb();
+  const db = await getDb();
   const id = newId();
   const ts = nowIso();
 
@@ -72,7 +72,7 @@ export async function createLead(input: CreateLeadInput): Promise<Lead> {
 }
 
 export async function listLeads(status?: LeadStatus): Promise<LeadWithMeta[]> {
-  const db = getDb();
+  const db = await getDb();
   const sql = status
     ? `SELECT l.*,
         (SELECT COUNT(*) FROM messages m WHERE m.lead_id = l.id) AS message_count,
@@ -99,7 +99,7 @@ export async function listLeads(status?: LeadStatus): Promise<LeadWithMeta[]> {
 }
 
 export async function getLead(id: string): Promise<Lead | null> {
-  const db = getDb();
+  const db = await getDb();
   const result = await db.execute({
     sql: "SELECT * FROM leads WHERE id = ?",
     args: [id],
@@ -112,7 +112,7 @@ export async function updateLeadStatus(
   id: string,
   status: LeadStatus,
 ): Promise<Lead | null> {
-  const db = getDb();
+  const db = await getDb();
   const ts = nowIso();
   await db.execute({
     sql: "UPDATE leads SET status = ?, updated_at = ? WHERE id = ?",
@@ -125,7 +125,7 @@ export async function linkLeadToProject(
   leadId: string,
   projectId: string,
 ): Promise<void> {
-  const db = getDb();
+  const db = await getDb();
   const ts = nowIso();
   await db.execute({
     sql: "UPDATE leads SET project_id = ?, status = 'won', updated_at = ? WHERE id = ?",
@@ -134,7 +134,7 @@ export async function linkLeadToProject(
 }
 
 export async function countLeadsByStatus(): Promise<Record<string, number>> {
-  const db = getDb();
+  const db = await getDb();
   const result = await db.execute(
     "SELECT status, COUNT(*) AS count FROM leads GROUP BY status",
   );
@@ -146,7 +146,7 @@ export async function countLeadsByStatus(): Promise<Record<string, number>> {
 }
 
 export async function countNewLeads(): Promise<number> {
-  const db = getDb();
+  const db = await getDb();
   const result = await db.execute(
     "SELECT COUNT(*) AS count FROM leads WHERE status = 'new'",
   );

@@ -153,8 +153,8 @@ export default function Home() {
             </p>
           </div>
           <ul className="grid gap-6 sm:grid-cols-2">
-            {products.map((p, i) => (
-              <ProductCard key={p.slug} p={p} index={i} />
+            {products.map((p) => (
+              <ProductCard key={p.slug} p={p} />
             ))}
 
             {/* "more on the way" placeholder card */}
@@ -202,8 +202,8 @@ export default function Home() {
             </p>
           </div>
           <ul className="grid gap-6 sm:grid-cols-2">
-            {brands.map((p, i) => (
-              <ProductCard key={p.slug} p={p} index={i} />
+            {brands.map((p) => (
+              <ProductCard key={p.slug} p={p} />
             ))}
           </ul>
         </div>
@@ -351,7 +351,7 @@ function Stat({ label, value }: { label: string; value: string | number }) {
   );
 }
 
-function ProductCard({ p, index }: { p: Product; index: number }) {
+function ProductCard({ p }: { p: Product }) {
   const isExternalUrl = /^https?:\/\//.test(p.url);
   const caseStudyHref = p.caseStudy
     ? `/brands/${p.caseStudySlug ?? p.slug}`
@@ -379,13 +379,24 @@ function ProductCard({ p, index }: { p: Product; index: number }) {
           aria-label={`Open ${p.name}`}
           className="relative block aspect-[16/10] overflow-hidden border-b border-[var(--border)] bg-[var(--background)]"
         >
-          <Image
-            src={p.image}
-            alt={p.imageAlt ?? p.name}
-            fill
-            sizes="(min-width: 640px) 50vw, 100vw"
-            className="object-cover object-top transition duration-500 group-hover:scale-[1.02]"
-          />
+          {/\.(mp4|webm|mov|m4v)$/i.test(p.image) ? (
+            <video
+              src={p.image}
+              autoPlay
+              muted
+              loop
+              playsInline
+              className="absolute inset-0 h-full w-full object-cover object-top transition duration-500 group-hover:scale-[1.02]"
+            />
+          ) : (
+            <Image
+              src={p.image}
+              alt={p.imageAlt ?? p.name}
+              fill
+              sizes="(min-width: 640px) 50vw, 100vw"
+              className="object-cover object-top transition duration-500 group-hover:scale-[1.02]"
+            />
+          )}
           <div
             aria-hidden
             className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100 dark:from-black/30"
@@ -411,7 +422,7 @@ function ProductCard({ p, index }: { p: Product; index: number }) {
             {p.status}
           </span>
           <span className="font-mono text-xs text-[var(--muted)]">
-            {String(index + 1).padStart(2, "0")} / {p.year}
+            {p.year}
           </span>
         </div>
         <h3 className="mt-8 text-3xl font-semibold tracking-tight">
